@@ -2,8 +2,8 @@
 
 # The docker entrypoint script for this postgres database instance
 
-# PING MASTER, IF EXIST START AS SLAVE
-nslookup ${PG_MASTER_HOST}
+# PING SLAVE, IF EXIST START AS SLAVE
+nslookup ${PG_SLAVE_HOST}
 rc=$?
 if [[ $rc -eq 0 ]]; then
 
@@ -12,11 +12,11 @@ if [[ $rc -eq 0 ]]; then
 		echo "*:*:*:${PG_REP_USER}:${PG_REP_PASSWORD}" > ~/.pgpass
 		chmod 0600 ~/.pgpass
 
-		# RESTORE FROM MASTER BACKUP (FROM 0)
-		until pg_basebackup -h ${PG_MASTER_HOST} -D ${PGDATA} -U ${PG_REP_USER} -vP -W
-	    do
-	        echo "Waiting for master to connect..."
-	        sleep 1s
+		# RESTORE FROM SLAVE BACKUP (FROM 0)
+		until pg_basebackup -h ${PG_SLAVE_HOST} -D ${PGDATA} -U ${PG_REP_USER} -vP -W
+    	do
+        	echo "Waiting for master to connect..."
+        	sleep 1s
 		done
 	fi
 
@@ -25,7 +25,7 @@ set -e
 
 cat > ${PGDATA}/recovery.conf <<EOF
 standby_mode = on
-primary_conninfo = 'host=${PG_MASTER_HOST} port=${PG_MASTER_PORT:-5432} user=${PG_REP_USER} password=${PG_REP_PASSWORD}'
+primary_conninfo = 'host=${PG_SLAVE_HOST} port=${PG_SLAVE_PORT:-5432} user=${PG_REP_USER} password=${PG_REP_PASSWORD}'
 restore_command = 'cp ${PGDATA}/archive/%f %p'
 trigger_file = '/tmp/touch_me_to_promote_to_me_master'
 recovery_target_timeline='latest'
@@ -35,7 +35,7 @@ chmod 700 ${PGDATA} -R
 
 echo "STARTED INSTANCE AS SLAVE"
 
-# MASTER DOES NOT EXIST, INITIALIZE AS MASTER
+# SLAVE DOES NOT EXIST, INITIALIZE AS MASTER
 else
 	echo "STARTED INSTANCE AS MASTER"
 	rm ${PGDATA}/recovery.conf

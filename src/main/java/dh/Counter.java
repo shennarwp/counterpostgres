@@ -22,8 +22,8 @@ public class Counter
             try
             {
                 Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection("jdbc:postgresql://localhost:5440/counter?autosave=always", "postgres", "postgres");
-                Thread.sleep(500);
+                connection = DriverManager.getConnection("jdbc:postgresql://localhost:5440,localhost:5441/counter?targetServerType=master&autosave=always", "postgres", "postgres");
+                Thread.sleep(1000);
             }
             catch (PSQLException e)
             {
@@ -49,7 +49,7 @@ public class Counter
             while (true)
             {
                 connection = createConnection();
-                connection.setNetworkTimeout(Executors.newSingleThreadExecutor(), 500);
+                connection.setNetworkTimeout(Executors.newSingleThreadExecutor(), 2000);
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setInt(1, i);
                 preparedStatement.executeUpdate();

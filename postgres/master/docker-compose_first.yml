@@ -1,8 +1,8 @@
 # postgres container configuration settings
-# for MASTER non-initial / consecutive run
-# assuming this instance has been started before,
-# if not, use / see docker-compose_FIRST.yml and Dockerfile_FIRST
-# so that the database timeline is created first
+# for MASTER initial run
+# only need to be used once for creating the initial
+# database timeline. run / see docker-compose.yml
+# for consecutive later run
 version: "3.7"
 services:
   db_counter_master:
@@ -10,7 +10,7 @@ services:
     image: ${MASTER_NAME}
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_FIRST
     volumes:
       - counter_master_home:/var/lib/postgresql/data
     environment:

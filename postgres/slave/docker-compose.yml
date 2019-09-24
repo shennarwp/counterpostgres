@@ -1,9 +1,13 @@
+# postgres container configuration settings
+# for SLAVE
 version: "3.7"
 services:
   db_counter_slave:
     container_name: ${SLAVE_NAME}
     image: ${SLAVE_NAME}
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - counter_slave_home:/var/lib/postgresql/data
     environment:
