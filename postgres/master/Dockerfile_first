@@ -1,5 +1,5 @@
 # Dockerfile to build the postgres instance image for the first time:
-# will be used ONLY by docker-compose_FIRST.yml
+# will be used ONLY by docker-compose_first.yml
 
 FROM postgres:alpine
 
