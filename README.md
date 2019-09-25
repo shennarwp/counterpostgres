@@ -8,7 +8,7 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 # Voraussetzung
 
-- docker
+- [Docker](https://www.docker.com/) ist installiert
 
 # Ausführen
 
@@ -36,9 +36,10 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 		`docker-compose build && docker-compose up`
 
-- compile und führe die Klasse Counter.java aus
+- compile und führe die Klasse `Counter.java` aus
 
-- Schaue die Datenbankinhalte an, (z.B. mit DBVisualizer) mit folgenden Konfigurationen:
+- Schaue die Datenbankinhalte an, (z.B. mit [DBVisualizer](https://www.dbvis.com/))
+	mit folgenden Konfigurationen:
 
 	|              | Master      | Slave       |
 	|--------------|-------------|-------------|
