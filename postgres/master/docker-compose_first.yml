@@ -10,7 +10,7 @@ services:
     image: ${MASTER_NAME}
     build:
       context: .
-      dockerfile: Dockerfile_FIRST
+      dockerfile: Dockerfile_first
     volumes:
       - counter_master_home:/var/lib/postgresql/data
     environment:
