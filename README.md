@@ -38,20 +38,15 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 - compile und führe die Klasse Counter.java aus
 
-- Schaue die Datenbankinhalte an, z.B. mit DBVisualizer:
-	- Masterkonfiguration:
-		- Host: `localhost`
-		- Port: `5440`
-		- User: `postgres`
-		- Password: `postgres`
-		- Databasename: `counter`
+- Schaue die Datenbankinhalte an, (z.B. mit DBVisualizer) mit folgenden Konfigurationen:
 
-	- Slavekonfiguration:
-		- Host: `localhost`
-		- Port: `5441`
-		- User: `postgres`
-		- Password: `postgres`
-		- Databasename: `counter`
+	|              | Master      | Slave       |
+	|--------------|-------------|-------------|
+	| Host         | `localhost` | `localhost` |
+	| Port         | `5440`      | `5441`      |
+	| User         | `postgres`  | `postgres`  |
+	| Password     | `postgres`  | `postgres`  |
+	| Databasename | `counter`   | `counter`   |
 
 # Testen des automatischen Failover-Mechanismus
 
