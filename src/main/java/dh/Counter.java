@@ -55,7 +55,7 @@ public class Counter
                 preparedStatement.executeUpdate();
                 logger.info(String.format("trying to insert '%s'", i));
                 i++;
-                Thread.sleep(1000);
+                Thread.sleep(1500);
             }
         }
         catch (SQLException | InterruptedException e)
