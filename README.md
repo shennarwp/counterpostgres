@@ -1,8 +1,10 @@
 # pgcounter
 
-Kleines Programm zur Demonstration des Redundanz- und Haltbarkeitsaspekts von Postgres.
+Kleines Programm zur Demonstration des Redundanz- und Haltbarkeitsaspekts von PostgreSQL.
 Es gibt zwei Datenbankinstanzen, nämlich Master-Slave, die beide im Docker-Container deployed werden.
 Die Counter-Anwendung versucht, eine Verbindung zum Master herzustellen und schreibt alle 1,5 Sekunden eine Integer.
+
+Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 # Voraussetzung
 
@@ -70,3 +72,11 @@ Die Counter-Anwendung versucht, eine Verbindung zum Master herzustellen und schr
 
 - Es gibt keinen Datenverlust, da die Counter-Anwendung nicht in die Datenbank schreibt,
 	wenn keine Master-Instanz vorhanden ist, sondern wartet sie bis dem Umschaltungsprozess abgeschlossen ist.
+
+
+# Referenzen
+
+- Die PostgreSQL-Dockerkonfigurationen ist vom
+[diesen Artikel](https://medium.com/@2hamed/replicating-postgres-inside-docker-the-how-to-3244dc2305be) basiert und modifiziert.
+- PostgreSQL Wiki: [Streaming Replication](https://wiki.postgresql.org/wiki/Streaming_Replication)
+- PostgreSQL Streaming Replication [Documentation](https://www.postgresql.org/docs/current/warm-standby.html)
