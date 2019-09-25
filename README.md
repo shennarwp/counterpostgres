@@ -1,3 +1,9 @@
+# pgcounter
+
+Kleines Programm zur Demonstration des Redundanz- und Haltbarkeitsaspekts von Postgres.
+Es gibt zwei Datenbankinstanzen, nämlich Master-Slave, die beide im Docker-Container deployed werden.
+Die Counter-Anwendung versucht, eine Verbindung zum Master herzustellen und schreibt alle 1,5 Sekunden eine Integer.
+
 # Voraussetzung
 
 - docker
