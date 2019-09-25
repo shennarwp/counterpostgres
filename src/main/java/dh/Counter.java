@@ -49,13 +49,23 @@ public class Counter
             while (true)
             {
                 connection = createConnection();
-                connection.setNetworkTimeout(Executors.newSingleThreadExecutor(), 2000);
-                PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setInt(1, i);
-                preparedStatement.executeUpdate();
-                logger.info(String.format("trying to insert '%s'", i));
-                i++;
-                Thread.sleep(1500);
+                if(connection.isValid(2))
+                {
+                    connection.setNetworkTimeout(Executors.newSingleThreadExecutor(), 2000);
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.setInt(1, i);
+                    preparedStatement.executeUpdate();
+                    logger.info(String.format("trying to insert '%s'", i));
+                    i++;
+                    Thread.sleep(1500);
+                }
+                else
+                {
+                    logger.info(String.format("Connection lost when trying to insert '%s', retrying...", i));
+                    Thread.sleep(1500);
+                    continue;
+                }
+
             }
         }
         catch (SQLException | InterruptedException e)
