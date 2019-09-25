@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - counter_slave_home:/var/lib/postgresql/data
+      - home:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -22,7 +22,7 @@ services:
     networks:
       - counter
 volumes:
-  counter_slave_home:
+  home:
 
 networks:
   counter:
