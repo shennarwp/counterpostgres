@@ -69,6 +69,10 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 - Es gibt keinen Datenverlust, da die Counter-Anwendung nicht in die Datenbank schreibt,
 	wenn keine Master-Instanz vorhanden ist, sondern wartet sie bis dem Umschaltungsprozess abgeschlossen ist.
 
+# TODO
+
+- jetzt hb
+
 
 # Referenzen
 
