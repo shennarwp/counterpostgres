@@ -2,7 +2,7 @@
 
 Kleines Programm zur Demonstration des Redundanz- und Haltbarkeitsaspekts von PostgreSQL.
 Es gibt zwei Datenbankinstanzen, nämlich Master-Slave, die beide im Docker-Container deployed werden.
-Die Counter-Anwendung versucht, eine Verbindung zum Master herzustellen und schreibt alle 1,5 Sekunden eine Integer.
+Die Counter-Anwendung versucht, eine Verbindung zum Master herzustellen und schreibt alle 2 Sekunden eine Integer.
 
 Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
@@ -24,7 +24,7 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 		`docker-compose -f init_compose.yml build && docker-compose -f init_compose.yml up`
 
-	- stoppe und starte die Instanz neu:
+	- **stoppe** und starte nochmal die Instanz neu:
 
 		`ctrl + c`
 
@@ -71,12 +71,13 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 # TODO
 
-- jetzt hb
+-
 
 
 # Referenzen
 
-- Die PostgreSQL-Dockerkonfigurationen ist vom
-[diesen Artikel](https://medium.com/@2hamed/replicating-postgres-inside-docker-the-how-to-3244dc2305be) basiert und modifiziert.
+- Die PostgreSQL-Dockerkonfigurationen sind von
+[diesem Artikel](https://medium.com/@2hamed/replicating-postgres-inside-docker-the-how-to-3244dc2305be)
+und von [diesem Repo](https://github.com/2hamed/docker-pg-replication) basiert und modifiziert.
 - PostgreSQL Wiki: [Streaming Replication](https://wiki.postgresql.org/wiki/Streaming_Replication)
 - PostgreSQL Streaming Replication [Documentation](https://www.postgresql.org/docs/current/warm-standby.html)
