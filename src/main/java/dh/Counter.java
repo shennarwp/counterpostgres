@@ -31,7 +31,8 @@ public class Counter
      */
     private void loadProperties()
     {
-        try {
+        try
+        {
             this.dbProperties = new Properties();
             dbProperties.load(Counter.class.getResourceAsStream("/db_info.properties"));
         }
@@ -68,17 +69,36 @@ public class Counter
     }
 
     /**
+     * close open connection
+     * @param connection to be closed
+     */
+    private void closeConnection(Connection connection)
+    {
+        if(connection != null)
+        {
+            try
+            {
+                connection.close();
+            }
+            catch (SQLException e)
+            {
+                logger.error(String.format("Error: '%s' while closing the connection", e));
+            }
+        }
+    }
+
+    /**
      * periodically every 2 seconds connect to the database and try to write integer number
      * if database is unreachable, it will wait and retry again
      */
     private void save()
     {
-        Connection connection;
-        int i = 0;
+        Connection connection = null;
         try
         {
             String sql = "INSERT INTO count VALUES (?)";
-            while (true)
+            int i = 0;
+            while (i < Integer.MAX_VALUE)
             {
                 connection = createConnection();
                 if(connection.isValid(2))
@@ -87,12 +107,12 @@ public class Counter
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setInt(1, i);
                     preparedStatement.executeUpdate();
-                    logger.info(String.format("Trying to insert '%s'", i));
+                    logger.info("Trying to insert {}", i);
                     i++;
                 }
                 else
                 {
-                    logger.info(String.format("Connection lost when trying to insert '%s', retrying...", i));
+                    logger.info("Connection lost when trying to insert {}, retrying...", i);
                     continue;
                 }
                 Thread.sleep(2000);
@@ -107,7 +127,10 @@ public class Counter
         {
             logger.error(String.format("Error: '%s' while trying to write to the database", se));
         }
-
+        finally
+        {
+            closeConnection(connection);
+        }
     }
 
     /**

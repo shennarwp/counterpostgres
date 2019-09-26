@@ -1,23 +1,29 @@
 #!/bin/bash
 
-# WILL BE RUN IN BACKGROUND
+# This is heartbeat-script,
+# the host will try to ping and reach another host,
+# determine if another whether another host is reachable.
+# This script is supposed to be run in background.
 while true
 do
-	# CHECK AND PING IF ANOTHER DATABASE INSTANCE RUNNING
+	# Check and ping if another database instance is already up and running
 	nslookup ${PG_SLAVE_HOST} > /dev/null
 	rc=$?
 	ping -c 1 -W 10 ${PG_SLAVE_HOST} > /dev/null
 	rd=$?
 
-	# IF NOT, THEN CREATE TRIGGER FILE TO PROMOTE ITSELF AS MASTER
-	# WAIT 10 SECONDS AND REMOVE THIS TRIGGER FILE AGAIN
-	# SO THAT LATER IF THIS INSTANCE IS RESTARTED,
-	# IT WILL NOT AUTOMATICALLY FIND TRIGGER FILE AND AUTOMATICALLY
-	# START AS MASTER
+	# If not, then create trigger file, which will be
+	# automatically detected by PostgreSQL service
+	# which then promote itself as master.
+	# Wait 10 seconds until the failover process is finished
+	# and then remove the trigger file again so that later
+	# if this instance is restarted as slave
+	# it will not automatically detect the trigger file and
+	# start as master
 	if ! [[ $rc -eq 0 && $rd -eq 0 ]]; then
-		touch /tmp/touch_me_to_promote_to_me_master
+		touch ${TRIGGER_FILE}
 		sleep 10
-		rm /tmp/touch_me_to_promote_to_me_master
+		rm ${TRIGGER_FILE}
 	fi
 	sleep 10
 done

@@ -20,6 +20,7 @@ services:
       PG_REP_USER: ${PG_REP_USER}
       PG_REP_PASSWORD: ${PG_REP_PASSWORD}
       PG_SLAVE_HOST: ${SLAVE_NAME}
+      TRIGGER_FILE: ${TRIGGER_FILE}
     ports:
       - "5440:5432"
     networks:

@@ -2,17 +2,24 @@
 
 # The docker entrypoint script for this postgres database instance
 
-# PING MASTER, IF EXIST START AS SLAVE
+# Ping MASTER
 nslookup ${PG_MASTER_HOST}
 rc=$?
+
+# If MASTER exist
 if [[ $rc -eq 0 ]]; then
 
-	# IF NEVER INITIALIZED BEFORE
+	# Remove any trigger file if exist, so it does not start automatically as master
+	if [[ -f ${TRIGGER_FILE} ]]; then
+    	rm ${TRIGGER_FILE}
+	fi
+
+	# If this instance has never been initialized before
 	if [ ! -s "${PGDATA}/PG_VERSION" ]; then
 		echo "*:*:*:${PG_REP_USER}:${PG_REP_PASSWORD}" > ~/.pgpass
 		chmod 0600 ~/.pgpass
 
-		# RESTORE FROM MASTER BACKUP (FROM 0)
+		# Restore / rebuild database from MASTER backup, from 0
 		until pg_basebackup -h ${PG_MASTER_HOST} -D ${PGDATA} -U ${PG_REP_USER} -vP -W
 	    do
 	        echo "Waiting for master to connect..."
@@ -20,14 +27,14 @@ if [[ $rc -eq 0 ]]; then
 		done
 	fi
 
-# MARK THIS INSTANCE AS SLAVE, CREATE RECOVERY.CONF FILE
+# Mark this instance as SLAVE, create recovery.conf file
 set -e
 
 cat > ${PGDATA}/recovery.conf <<EOF
 standby_mode = on
 primary_conninfo = 'host=${PG_MASTER_HOST} port=${PG_MASTER_PORT:-5432} user=${PG_REP_USER} password=${PG_REP_PASSWORD}'
 restore_command = 'cp ${PGDATA}/archive/%f %p'
-trigger_file = '/tmp/touch_me_to_promote_to_me_master'
+trigger_file = '${TRIGGER_FILE}'
 recovery_target_timeline='latest'
 EOF
 chown ${POSTGRES_USER} ${PGDATA} -R
@@ -35,23 +42,25 @@ chmod 700 ${PGDATA} -R
 
 echo "STARTED INSTANCE AS SLAVE"
 
-# MASTER DOES NOT EXIST, INITIALIZE AS MASTER
+# MASTER does not exist, remove any existing recovery.conf file
 else
 	echo "STARTED INSTANCE AS MASTER"
 	rm ${PGDATA}/recovery.conf
 fi
 
-# LISTEN TO ALL
+# Listen to all interface
 echo "host replication all 0.0.0.0/0 md5" >> "${PGDATA}/pg_hba.conf"
 
-# REPLICATION LEVEL
+# Replication level
 sed -i 's/wal_level = hot_standby/wal_level = replica/g' ${PGDATA}/postgresql.conf
 
-# DIRECTORY FOR ARCHIVE
+# Create directory for archiving
 mkdir -p ${PGDATA}/archive
 chmod 700 ${PGDATA}/archive
 chown -R ${POSTGRES_USER}:${POSTGRES_USER} ${PGDATA}/archive
 
-# INITIALIZE HEARTBEAT SCRIPT
+# Initialize heartbeat script
 nohup /heartbeat.sh > /dev/null 2>&1 &
+
+# Start the instance as user postgres
 gosu ${POSTGRES_USER} ${POSTGRES_USER}

@@ -17,6 +17,7 @@ services:
       PG_REP_USER: ${PG_REP_USER}
       PG_REP_PASSWORD: ${PG_REP_PASSWORD}
       PG_MASTER_HOST: ${MASTER_NAME}
+      TRIGGER_FILE: ${TRIGGER_FILE}
     ports:
       - "5441:5432"
     networks:
