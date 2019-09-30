@@ -15,6 +15,12 @@ RUN chmod +x /usr/bin/gosu \
 	\
 	&& apk add --update iputils \
 	\
-	&& apk add --update htop
+	&& apk add --update htop \
+	\
+	&& apk add rsync openssh \
+	\
+	&& apk add --no-cache openrc \
+	\
+	&& rc-update add sshd
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

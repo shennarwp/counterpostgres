@@ -20,20 +20,18 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER}" --dbname "${POSTGRES_DB}" 
 EOSQL
 
 # Configuration file for standby / replication
+# this will be copied to another slave is another instance is started
 cat >> ${PGDATA}/postgresql.conf <<EOF
 
 wal_level = replica
 archive_mode = on
-archive_command = 'cp %p ${PGDATA}/archive/%f'
+archive_command = 'cp %p ${ARCHIVE_DIR}/%f && rsync -a %p ${POSTGRES_USER}@${PG_SLAVE_HOST}:${ARCHIVE_DIR}/%f'
 max_wal_senders = 2
 wal_keep_segments = 8
 hot_standby = on
 EOF
 
-# Archive folder
-mkdir -p ${PGDATA}/archive
-chmod 700 ${PGDATA}/archive
-chown -R ${POSTGRES_USER}:${POSTGRES_USER} ${PGDATA}/archive
+#archive_command = 'cp %p ${ARCHIVE_DIR}/%f'
 
 # Remove this initialization script, so that later if this database restarted,
 # it will not be initialized again, but instead directly follow and catch up with another

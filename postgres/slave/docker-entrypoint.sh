@@ -25,6 +25,8 @@ if [[ $rc -eq 0 ]]; then
 	        echo "Waiting for master to connect..."
 	        sleep 1s
 		done
+		#sed -i "s/^archive_command =.*/archive_command = 'rsync -a %p \${POSTGRES_USER}@\${PG_SLAVE_HOST}:\${ARCHIVE_DIR}\/%f'/g" ${PGDATA}/postgresql.conf
+		sed -i "s/^archive_command =.*/archive_command = 'cd .'/g" ${PGDATA}/postgresql.conf
 	fi
 
 # Mark this instance as SLAVE, create recovery.conf file
@@ -33,7 +35,7 @@ set -e
 cat > ${PGDATA}/recovery.conf <<EOF
 standby_mode = on
 primary_conninfo = 'host=${PG_MASTER_HOST} port=${PG_MASTER_PORT:-5432} user=${PG_REP_USER} password=${PG_REP_PASSWORD}'
-restore_command = 'cp ${PGDATA}/archive/%f %p'
+restore_command = 'cp ${ARCHIVE_DIR}/%f %p'
 trigger_file = '${TRIGGER_FILE}'
 recovery_target_timeline='latest'
 EOF
@@ -45,19 +47,17 @@ echo "STARTED INSTANCE AS SLAVE"
 # MASTER does not exist, remove any existing recovery.conf file
 else
 	echo "STARTED INSTANCE AS MASTER"
-	rm ${PGDATA}/recovery.conf
+	if [ -f ${PGDATA}/recovery.conf ]; then
+		rm ${PGDATA}/recovery.conf
+	fi
 fi
 
-# Listen to all interface
-echo "host replication all 0.0.0.0/0 md5" >> "${PGDATA}/pg_hba.conf"
-
-# Replication level
-sed -i 's/wal_level = hot_standby/wal_level = replica/g' ${PGDATA}/postgresql.conf
-
-# Create directory for archiving
-mkdir -p ${PGDATA}/archive
-chmod 700 ${PGDATA}/archive
-chown -R ${POSTGRES_USER}:${POSTGRES_USER} ${PGDATA}/archive
+# Create directory for archiving if it does not yet exist
+if [ ! -d ${ARCHIVE_DIR} ]; then
+	mkdir -p ${ARCHIVE_DIR}
+	chmod 700 ${ARCHIVE_DIR}
+	chown -R ${POSTGRES_USER}:${POSTGRES_USER} ${ARCHIVE_DIR}
+fi
 
 # Initialize heartbeat script
 nohup /heartbeat.sh > /dev/null 2>&1 &

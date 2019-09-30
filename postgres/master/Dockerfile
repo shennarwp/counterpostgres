@@ -15,6 +15,9 @@ RUN chmod +x /usr/bin/gosu \
 	\
 	&& apk add --update iputils \
 	\
-	&& apk add --update htop
+	&& apk add --update htop \
+	\
+	&& apk add rsync openssh
+
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

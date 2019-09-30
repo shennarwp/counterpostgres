@@ -6,9 +6,11 @@ Die Counter-Anwendung versucht, eine Verbindung zum Master herzustellen und schr
 
 Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
+
 # Voraussetzung
 
 - [Docker](https://www.docker.com/) ist installiert
+
 
 # Ausführen
 
@@ -49,6 +51,7 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 	| Password     | `postgres`  | `postgres`  |
 	| Databasename | `counter`   | `counter`   |
 
+
 # Testen des automatischen Failover-Mechanismus
 
 - stoppe eine Instanz mit `ctrl + c`
@@ -68,6 +71,16 @@ Der verwendete PostgreSQL-Replikationsmechanismus ist die Streaming Replication
 
 - Es gibt keinen Datenverlust, da die Counter-Anwendung nicht in die Datenbank schreibt,
 	wenn keine Master-Instanz vorhanden ist, sondern wartet sie bis dem Umschaltungsprozess abgeschlossen ist.
+
+
+# Cleanup
+
+lösche alle Container, Images, und Volumen
+
+`docker container rm db_counter_master && docker image rm db_counter_master && docker volume rm master_home`
+
+`docker container rm db_counter_slave && docker image rm db_counter_slave && docker volume rm slave_home`
+
 
 # TODO
 
