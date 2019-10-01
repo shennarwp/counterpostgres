@@ -84,7 +84,7 @@ lösche alle Container, Images, und Volumen
 
 # TODO
 
--
+- rsync
 
 
 # Referenzen
