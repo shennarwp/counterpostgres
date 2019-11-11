@@ -1,20 +1,21 @@
 # Dockerfile to build this postgres instance image for consecutive / later time
 # will be used ONLY by docker-compose.yml
 
-FROM postgres:alpine
+FROM postgres:12.0
 
-ENV GOSU_VERSION 1.11
 
-ADD ./gosu /usr/bin/
+COPY ./init.sh /docker-entrypoint-initdb.d/init.sh
 
 COPY ./docker-entrypoint.sh ./heartbeat.sh /
 
-RUN chmod +x /usr/bin/gosu \
-	\
-	&& chmod +x /docker-entrypoint.sh \
-	\
-	&& apk add --update iputils \
-	\
-	&& apk add --update htop
+RUN set -eux \
+	&& apt-get update \
+	&& apt-get install -y \
+		gosu \
+		iputils-ping \
+		dnsutils \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& chmod +x /docker-entrypoint-initdb.d/init.sh \
+	&& chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
