@@ -1,4 +1,4 @@
-# pgcounter
+# counterpostgres
 
 Kleines Programm zur Demonstration des Redundanz- und Haltbarkeitsaspekts von PostgreSQL.
 Es gibt zwei Datenbankinstanzen, nämlich Master-Slave, die beide im Docker-Container deployed werden.
