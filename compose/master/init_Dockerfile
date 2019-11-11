@@ -1,9 +1,0 @@
-# Dockerfile to build the postgres instance image for the first time:
-# will be used ONLY by docker-compose_first.yml
-
-FROM postgres:alpine
-
-# copy Initialization script for this postgres instance image
-COPY ./setup-master.sh /docker-entrypoint-initdb.d/setup-master.sh
-
-RUN chmod 777 /docker-entrypoint-initdb.d
