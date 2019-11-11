@@ -1,8 +1,5 @@
 # postgres container configuration settings
-# for MASTER non-initial / consecutive run
-# assuming this instance has been started before,
-# if not, use / see docker-compose_first.yml and Dockerfile_first
-# so that the database timeline is created first
+# for MASTER
 version: "3.7"
 services:
   db_counter_master:
@@ -20,7 +17,6 @@ services:
       PG_REP_USER: ${PG_REP_USER}
       PG_REP_PASSWORD: ${PG_REP_PASSWORD}
       PG_SLAVE_HOST: ${SLAVE_NAME}
-      TRIGGER_FILE: ${TRIGGER_FILE}
     ports:
       - "5440:5432"
     networks:
