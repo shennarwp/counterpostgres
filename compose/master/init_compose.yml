@@ -1,0 +1,33 @@
+# postgres container configuration settings
+# for MASTER initial run
+# only need to be used once for creating the initial
+# database timeline. run / see docker-compose.yml
+# for consecutive later run
+version: "3.7"
+services:
+  db_counter_master:
+    container_name: ${MASTER_NAME}
+    image: ${MASTER_NAME}
+    build:
+      context: .
+      dockerfile: init_Dockerfile
+    volumes:
+      - home:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PG_REP_USER: ${PG_REP_USER}
+      PG_REP_PASSWORD: ${PG_REP_PASSWORD}
+      PG_SLAVE_HOST: ${SLAVE_NAME}
+      TRIGGER_FILE: ${TRIGGER_FILE}
+    ports:
+      - "5440:5432"
+    networks:
+      - counter
+volumes:
+  home:
+
+networks:
+  counter:
+    external: true

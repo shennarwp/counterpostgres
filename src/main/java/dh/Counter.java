@@ -17,18 +17,14 @@ public class Counter
     private Logger logger;
     private Properties dbProperties;
 
-    /**
-     * Default constructor
-     */
+    /** Default constructor */
     private Counter()
     {
         logger = LogManager.getLogger(this.getClass());
         loadProperties();
     }
 
-    /**
-     * load the database information from the properties file
-     */
+    /** load the database information from the properties file */
     private void loadProperties()
     {
         try
@@ -42,10 +38,7 @@ public class Counter
         }
     }
 
-    /**
-     * create connection to the database
-     * @return the connection
-     */
+    /** create connection to the database */
     private Connection createConnection()
     {
         Connection connection = null;
@@ -68,10 +61,7 @@ public class Counter
         return connection;
     }
 
-    /**
-     * close open connection
-     * @param connection to be closed
-     */
+    /** close open connection */
     private void closeConnection(Connection connection)
     {
         if(connection != null)
@@ -133,9 +123,7 @@ public class Counter
         }
     }
 
-    /**
-     * main
-     */
+    /** main */
     public static void main(String... args)
     {
         Counter counter = new Counter();
