@@ -82,3 +82,4 @@ The old master instance is restarted, notices that there is already existing new
 - Based on [this tutorial](https://medium.com/@2hamed/replicating-postgres-inside-docker-the-how-to-3244dc2305be) and [this repository](https://github.com/2hamed/docker-pg-replication), but heavily modified
 - PostgreSQL Wiki: [Streaming Replication](https://wiki.postgresql.org/wiki/Streaming_Replication)
 - PostgreSQL Streaming Replication [Documentation](https://www.postgresql.org/docs/current/warm-standby.html)
+- PostgreSQL [jdbc documentation](https://jdbc.postgresql.org/documentation/head/connect.html)
