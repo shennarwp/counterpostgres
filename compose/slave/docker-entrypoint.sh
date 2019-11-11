@@ -4,15 +4,13 @@
 
 # Ping MASTER
 nslookup ${PG_MASTER_HOST}
-rc=$?
+reachable=$?
+ping -c 1 -W 10 ${PG_MASTER_HOST}
+pingable=$?
 
 # If MASTER exist
-if [[ $rc -eq 0 ]]; then
-
-	# Remove any trigger file if exist, so it does not start automatically as master
-	if [[ -f ${TRIGGER_FILE} ]]; then
-    	rm ${TRIGGER_FILE}
-	fi
+if [[ $reachable -eq 0 && $pingable -eq 0 ]]; then
+	echo "STARTED INSTANCE AS SLAVE"
 
 	# If this instance has never been initialized before
 	if [ ! -s "${PGDATA}/PG_VERSION" ]; then
@@ -21,46 +19,66 @@ if [[ $rc -eq 0 ]]; then
 
 		# Restore / rebuild database from MASTER backup, from 0
 		until pg_basebackup -h ${PG_MASTER_HOST} -D ${PGDATA} -U ${PG_REP_USER} -vP -W
-	    do
-	        echo "Waiting for master to connect..."
-	        sleep 1s
+    	do
+        	echo "Waiting for master to connect..."
+        	sleep 1s
 		done
+
+		echo "primary_conninfo = 'host=${PG_MASTER_HOST} port=5432 user=${PG_REP_USER} password=${PG_REP_PASSWORD}'" >> ${PGDATA}/postgresql.conf
+
+		# Archive folder
+		mkdir -p ${PGDATA}/archive
+		chown ${POSTGRES_USER} ${PGDATA} -R
+		chmod 700 ${PGDATA} -R
 	fi
 
-# Mark this instance as SLAVE, create recovery.conf file
-set -e
+	# mark / signal this instance as standby / slave server
+	touch "${PGDATA}/standby.signal"
 
-cat > ${PGDATA}/recovery.conf <<EOF
-standby_mode = on
-primary_conninfo = 'host=${PG_MASTER_HOST} port=${PG_MASTER_PORT:-5432} user=${PG_REP_USER} password=${PG_REP_PASSWORD}'
-restore_command = 'cp ${PGDATA}/archive/%f %p'
-trigger_file = '${TRIGGER_FILE}'
-recovery_target_timeline='latest'
-EOF
-chown ${POSTGRES_USER} ${PGDATA} -R
-chmod 700 ${PGDATA} -R
-
-echo "STARTED INSTANCE AS SLAVE"
-
-# MASTER does not exist, remove any existing recovery.conf file
+# SLAVE does not exist
 else
 	echo "STARTED INSTANCE AS MASTER"
-	rm ${PGDATA}/recovery.conf
+
+	# If this instance has never been initialized before
+	if [ ! -s "$PGDATA/PG_VERSION" ]; then
+
+		# Initialize the database for the first time, start
+		gosu "${POSTGRES_USER}" initdb
+		gosu "${POSTGRES_USER}" pg_ctl -D "$PGDATA" -w start
+
+		# Run all .sql and .sh scripts in this folder /docker-entrypoint-initdb.d/
+		for f in /docker-entrypoint-initdb.d/*; do
+			case "$f" in
+				*.sh)
+					if [ -x "$f" ]; then
+						echo "$0: running $f"
+						"$f"
+					else
+						echo "$0: sourcing $f"
+						. "$f"
+					fi
+					;;
+				*.sql)    echo "$0: running $f"; "${psql[@]}" -f "$f"; echo ;;
+				#*.sql.gz) echo "$0: running $f"; gunzip -c "$f" | "${psql[@]}"; echo ;;
+				*)        echo "$0: ignoring $f" ;;
+			esac
+			echo
+		done
+
+		echo "primary_conninfo = 'host=${PG_MASTER_HOST} port=5432 user=${PG_REP_USER} password=${PG_REP_PASSWORD}'" >> ${PGDATA}/postgresql.conf
+
+		# Archive folder
+		mkdir -p ${PGDATA}/archive
+		chown ${POSTGRES_USER} ${PGDATA} -R
+		chmod 700 ${PGDATA} -R
+
+		gosu "${POSTGRES_USER}" pg_ctl -D "$PGDATA" -m fast -w stop
+
+	fi
 fi
-
-# Listen to all interface
-echo "host replication all 0.0.0.0/0 md5" >> "${PGDATA}/pg_hba.conf"
-
-# Replication level
-sed -i 's/wal_level = hot_standby/wal_level = replica/g' ${PGDATA}/postgresql.conf
-
-# Create directory for archiving
-mkdir -p ${PGDATA}/archive
-chmod 700 ${PGDATA}/archive
-chown -R ${POSTGRES_USER}:${POSTGRES_USER} ${PGDATA}/archive
 
 # Initialize heartbeat script
 nohup /heartbeat.sh > /dev/null 2>&1 &
 
-# Start the instance as user postgres
-gosu ${POSTGRES_USER} ${POSTGRES_USER}
+# start the postgres service
+gosu "${POSTGRES_USER}" postgres
