@@ -8,22 +8,19 @@ while true
 do
 	# Check and ping if another database instance is already up and running
 	nslookup ${PG_SLAVE_HOST} > /dev/null
-	rc=$?
+	reachable=$?
 	ping -c 1 -W 10 ${PG_SLAVE_HOST} > /dev/null
-	rd=$?
+	pingable=$?
 
-	# If not, then create trigger file, which will be
-	# automatically detected by PostgreSQL service
-	# which then promote itself as master.
-	# Wait 10 seconds until the failover process is finished
-	# and then remove the trigger file again so that later
-	# if this instance is restarted as slave
-	# it will not automatically detect the trigger file and
-	# start as master
-	if ! [[ $rc -eq 0 && $rd -eq 0 ]]; then
-		touch ${TRIGGER_FILE}
-		sleep 10
-		rm ${TRIGGER_FILE}
+	# Another host is down
+	# check if it is currently running as standby / slave
+	# if it is now the master, then skip
+	# if it is now the slave, then promote itself as master
+	if ! [[ $reachable -eq 0 && $pingable -eq 0 ]]; then
+		recoverystatus=$(psql --username "${POSTGRES_USER}" -tA -c "SELECT pg_is_in_recovery();")
+		if [ $recoverystatus == "t" ]; then
+			psql --username "${POSTGRES_USER}" -c "SELECT pg_promote();"
+		fi
 	fi
 	sleep 10
 done
